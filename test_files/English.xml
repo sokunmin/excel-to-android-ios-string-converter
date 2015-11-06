@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- Share Text -->
+	<string name="app_name">Test App</string><!-- #55ff7f -->
+	<string name="error">Error</string>
+	<!-- Button Text -->
+	<string name="button_ok">OK</string>
+	<string name="button_next">Next</string>
+	<string name="button_cancel">Cancel</string>
+	<string name="button_skip">Skip</string>
+	<string name="button_yes">Yes</string>
+	<string name="button_no">No</string>
+	<string name="button_close">Close</string>
+	<string name="button_retry">Retry</string>
+	<string name="button_back">Back</string>
+	<string name="button_pause">Pause</string>
+	<string name="button_stop">Stop</string>
+	<string name="button_download">Download</string>
+	<!-- Other Text -->
+	<string name="loading">Loading&#8230;</string>
+	<string name="finishing">Finishing&#8230;</string>
+	<string name="upgrading">Upgrading&#8230;</string>
+	<string name="receiving">Receiving&#8230;</string>
+	<string name="waiting">Please wait&#8230;</string>
+	<string name="non_network">Unable to Connect</string>
+</resources>

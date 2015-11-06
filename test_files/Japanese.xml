@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- Share Text -->
+	<string name="app_name">Test App</string><!-- #55ff7f -->
+	<string name="error">停止</string>
+	
+	<!-- Button Text -->
+	<string name="button_ok">OK</string>
+	<string name="button_next">次へ</string>
+	<string name="button_cancel">キャンセル</string>
+	<string name="button_skip">スキップ</string>
+	<string name="button_yes">はい</string>
+	<string name="button_no">いいえ</string>
+	<string name="button_close">オフ</string>
+	<string name="button_retry">再試行</string>
+	<string name="button_back">戻る</string>
+	<string name="button_pause">一時停止</string>
+	<string name="button_stop">停止</string>
+	<string name="button_download">ダウンロード</string>
+	<!-- Other Text -->
+	<string name="loading">データをダウンロード中&#8230;</string>
+	<string name="finishing">終了しています&#8230;</string>
+	<string name="upgrading">更新中&#8230;</string>
+	<string name="receiving">データを受信中&#8230;</string>
+	<string name="waiting">しばらくお待ちください&#8230;</string>
+	<string name="non_network">接続できません</string>
+</resources>
