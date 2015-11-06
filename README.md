@@ -5,7 +5,7 @@
 ##Output selection
 ![Output format](https://github.com/sokunmin/StringResourceConverter/blob/master/screen_shots/1.png)
 
-##Read from string resource
+##Read from string resource or exported Excel file
 ![Read from string resource](https://github.com/sokunmin/StringResourceConverter/blob/master/screen_shots/2.png)
 
 ##Output Excel
