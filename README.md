@@ -9,8 +9,10 @@ https://github.com/sokunmin/string-resource-converter/tree/master/built_exec
 ## Step 1: Output options.
 ![Output format](https://github.com/sokunmin/StringResourceConverter/blob/master/screen_shots/1.png)
 
-## Step 2: Open the string resource of a specific platform or the formated excel file exported using this app.
+## Step 2: Open the string resource of a specific platform or the formated Excel file exported using this app.
+Example: open an [`Test.xlsx`](https://github.com/sokunmin/string-resource-converter/blob/master/test_files/Test.xlsx) exported using `StringResourceConverter` app.
 ![Output Excel](https://github.com/sokunmin/StringResourceConverter/blob/master/screen_shots/3.png)
 
-## Step 3: Output to indicated format for specific platform.
+## Step 3: Output string resource to indicated format for specific platform.
+Example: output `Test.xlsx` content to `Android` string resource.
 ![Read from string resource](https://github.com/sokunmin/StringResourceConverter/blob/master/screen_shots/2.png)
