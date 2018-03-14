@@ -9,7 +9,7 @@ https://github.com/sokunmin/string-resource-converter/tree/master/built_exec
 ## Step 1: Output options.
 ![Output format](https://github.com/sokunmin/StringResourceConverter/blob/master/screen_shots/1.png)
 
-## Step 2: read exported Excel file or the string resource of a specific platform.
+## Step 2: Open the string resource of a specific platform or the formated excel file exported using this app.
 ![Output Excel](https://github.com/sokunmin/StringResourceConverter/blob/master/screen_shots/3.png)
 
 ## Step 3: Output to indicated format for specific platform.
