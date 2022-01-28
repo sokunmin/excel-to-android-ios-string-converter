@@ -43,9 +43,15 @@ QStringList AndroidParser::parse(const QDir &dir, const QStringList &files)
                 QRegExp commentx(pattern2);
                 if (commentx.exactMatch(line)) { //Is it a comment?
                     commentx.indexIn(line);
-                    if (!isNameExisted(commentx.cap(1).trimmed())) { //Is the comment added in the map?
+                    QString parsedText = commentx.cap(1).trimmed();
+                    QStringList textList = parsedText.split("|");
+                    if (!isNameExisted(parsedText)) { //Is the comment added in the map?
                         Language * lang = new Language(this);
-                        lang->add(commentx.cap(1).trimmed(), fileInfo.baseName(), "", QColor("#EEEEEE"));
+                        if (textList.size() > 1) {
+                            lang->add(textList.first(), fileInfo.baseName(), "", QColor(textList.last().trimmed()));
+                        } else {
+                            lang->add(parsedText, fileInfo.baseName(), "", QColor("#FFFFFF"));
+                        }
                         lang->isComment = true;
                         langMap.append(lang);
                     }
@@ -95,21 +101,35 @@ void AndroidParser::save(const QString &output, const QTableWidget *table)
                 QString content = XML_CONTENT_1;
                 for (int k = 0; k < table->rowCount(); ++k) {
                     if (table->columnSpan(k, 0) == table->columnCount()) { //span row / header
-                        content.append("\n	<!-- ").append(table->item(k, 0)->text()).append(" -->\n");
+                        QTableWidgetItem *cell = table->item(k, 0);
+                        if (cell != NULL) {
+                            QColor bgColor = cell->backgroundColor();
+                            QString headerText = cell->text();
+                            if (k != 0 && i == 1) {
+                                content.append("\n	<!-- ")
+                                       .append(headerText)
+                                       .append("|")
+                                       .append(bgColor.name())
+                                       .append(" -->\n");
+                            }
+                        }
                     } else {
-
-                        QString color = table->item(k, i)->backgroundColor().name();
-                        color = (color.compare("#FFFFFF", Qt::CaseInsensitive))?color:"";
-                        if (color != "")
-                            color = "<!-- " + color + " -->";
-
-                        content.append("	<string name=\"")
-                               .append(table->item(k, 0)->text())
-                               .append("\">")
-                               .append(table->item(k, i)->text())
-                               .append("</string>")
-                               .append(color)
-                               .append("\n");
+                        QTableWidgetItem *cell = table->item(k, i);
+                        if (cell != NULL) {
+                            QString cellText = cell->text();
+                            QColor bgColor = cell->backgroundColor();
+                            QString colorName = bgColor.name();
+                            colorName = (colorName.compare("#FFFFFF", Qt::CaseInsensitive))?colorName:"";
+                            if (colorName != "")
+                                colorName = "<!-- " + colorName + " -->";
+                            content.append("	<string name=\"")
+                                   .append(table->item(k, 0)->text())
+                                   .append("\">")
+                                   .append(cellText)
+                                   .append("</string>")
+                                   .append(colorName)
+                                   .append("\n");
+                        }
                     }
                 }
                 content.append(XML_CONTENT_2);

@@ -6,7 +6,6 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 
-QTXLSX_USE_NAMESPACE
 
 const QString LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const QString ENDTAG = "<!-- ENDTAG -->";

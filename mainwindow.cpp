@@ -9,6 +9,8 @@
 #include "language.h"
 #include "xlsxdocument.h"
 #include "xlsxformat.h"
+#include "xlsxcellformula.h"
+#include "xlsxcellrange.h"
 #include "androidparser.h"
 #include "windowsparser.h"
 #include "macosxparser.h"
@@ -22,10 +24,10 @@ http://pydoing.blogspot.tw/2012/10/cpp-class.html
 http://openhome.cc/Gossip/CppGossip/ClassABC.html
 http://www.cnblogs.com/oomusou/archive/2007/03/31/695076.html
 */
-QTXLSX_USE_NAMESPACE
+using namespace QXlsx;
 
 MainWindow::MainWindow() : curSearchIndex(0),
-    prevCell(0),isOpenMode(true)
+    prevCell(0), isOpenMode(true)
 {
     currentDir = QDir::current();
     //create menu &
@@ -177,22 +179,17 @@ void MainWindow::platformSelect(const int index)
             files = QFileDialog::getOpenFileNames(this, "Select one or more files to open", currentDir.absolutePath(), fileType);
             break;
         }
-        case Platform::WINDOWS: {
-            fileType = "XML files(*.xml)";
-            parser = new WindowsParser(this);
-            files = QFileDialog::getOpenFileNames(this, "Select one or more files to open", currentDir.absolutePath(), fileType);
-            break;
-        }
-        case Platform::MACOSX: {
+        case Platform::IOS: {
             fileType = "Strings files(*.strings)";
             parser = new MacOSXParser(this);
             files = QFileDialog::getOpenFileNames(this, "Select one or more files to open", currentDir.absolutePath(), fileType);
             break;
         }
-        case Platform::ENGINE_BOARD: {
+        case Platform::WEB: {
+            QMessageBox::warning(this, "WARN", "Web output is not implemented yet!");
             break;
         }
-        case Platform::MARKET_EXCEL: {
+        case Platform::EXCEL: {
             fileType = "Excel 2007(*.xlsx)";
             QString file = QFileDialog::getOpenFileName(this, "Select one file to open", currentDir.absolutePath(), fileType);
 
@@ -239,12 +236,13 @@ void MainWindow::platformSelect(const int index)
                 QMapIterator<QString, QString> i(lang->map);
                 //iterator
                 if (lang->isComment) {
-                    createItem(row, 0, lang->name, QColor("#EEEEEE"), false, (headers.count()));
+                    QColor bgColor = lang->colors[headers[1]];
+                    createItem(row, 0, lang->name, QColor(Qt::black), bgColor, false, 1, headers.count());
                 } else {
-                    createItem(row, 0, lang->name, QColor("#FFFFFF"), false);
+                    createItem(row, 0, lang->name, QColor(Qt::black), QColor("#FFFFFF"), false, 0);
                     while (i.hasNext()) {
                         i.next();
-                        createItem(row, findIndexOfColumn(i.key()), i.value(), lang->colors.find(i.key()).value());
+                        createItem(row, findIndexOfColumn(i.key()), i.value(), QColor(Qt::black), lang->colors.find(i.key()).value());
                     }
                 }
                 ++row;
@@ -262,25 +260,21 @@ void MainWindow::platformSelect(const int index)
                 parser->save(directory, tableView);
                 break;
             }
-            case Platform::WINDOWS: {
-                parser = new WindowsParser(this);
-                parser->save(directory, tableView);
-                break;
-            }
-            case Platform::MACOSX: {
+            case Platform::IOS: {
                 parser = new MacOSXParser(this);
                 parser->save(directory, tableView);
                 break;
             }
-            case Platform::ENGINE_BOARD: {
+            case Platform::WEB: {
+                QMessageBox::warning(this, "WARN", "Web output is not implemented yet!");
                 break;
             }
-            case Platform::MARKET_EXCEL: {
+            case Platform::EXCEL: {
                 saveToExcel(directory, tableView);
                 break;
             }
             }
-            QMessageBox::warning(this, "DONE", "Files exported successfully!");
+            QMessageBox::information(this, "DONE", "Files exported successfully!");
         }
     }
 }
@@ -298,25 +292,56 @@ void MainWindow::openExcel(const QString &input)
     tableView->setRowCount(rowCount-1);
     tableView->setColumnCount(colCount);
     qDebug() << QString("ColCount:%1, RowCount:%2 ").arg(colCount).arg(rowCount);
+    // https://www.twblogs.net/a/5beae0022b717720b51e8bcb
+    QList<CellRange> mergedCellRangeList = xlsx.currentWorksheet()->mergedCells();
 
-    for (int col = 0; col < colCount; ++col) {
-
-        tableView->setColumnWidth(col, 250);
-        for (int row = 0; row < rowCount; ++row) {
+    for (int row = 0; row < rowCount; ++row) {
+        QString mergedCellText = "";
+        for (int col = 0; col < colCount; ++col) {
+            tableView->setColumnWidth(col, 250);
             if (Cell *cell = xlsx.cellAt(row+1, col+1)) {
+                QColor fontColor = cell->format().fontColor();
+                QColor bgColor = cell->format().patternBackgroundColor();
+                QString cellText = cell->value().toString();
+                qDebug() << QString("Current CellText(row:%1, col:%2)=%3, %4").arg(row).arg(col).arg(cellText).arg(bgColor.name());
                 if (row == 0) {
-                    QTableWidgetItem * item = new QTableWidgetItem(cell->value().toString());
+                    QTableWidgetItem * item = new QTableWidgetItem(cellText);
                     tableView->setHorizontalHeaderItem(col, item);
+                    item->setBackground(bgColor);
                 } else {
-                    QColor bgColor = cell->format().patternBackgroundColor();
-
-                    QColor fontColor =  cell->format().fontColor();
-                    bool isMerged = (bgColor == QColor("#c4c7d8") && fontColor == QColor(Qt::blue));
-                    if (!cell->value().toString().isEmpty())
-                        createItem(row-1, col, cell->value().toString(), (bgColor.name() == "#000000")?QColor(Qt::white):bgColor, !(isMerged || !col ), (isMerged)?colCount:0);
+                    if(mergedCellRangeList.size() > 0) {
+                        bool isCellSpan = false;
+                        int spanColCount = 0;
+                        int spanRowCount = 0;
+                        foreach(CellRange cellRange, mergedCellRangeList) {
+                            int firstRow = cellRange.firstRow();
+                            int lastRow = cellRange.lastRow();
+                            int firstCol = cellRange.firstColumn();
+                            int lastCol = cellRange.lastColumn();
+                            spanColCount = lastCol - firstCol;
+                            spanRowCount = lastRow - firstRow;
+                            qDebug() << QString("Check SpanCell(r1:%1, r2:%2, c1:%3, c2:%4) / (r:%5, c:%6)")
+                                        .arg(firstRow).arg(lastRow).arg(firstCol).arg(lastCol).arg(spanRowCount).arg(spanColCount);
+                            if(firstRow <= row + 1 && row + 1 <= lastRow && firstCol <= col + 1 && col + 1 <= lastCol) {
+                                QString mergedText = xlsx.read(firstRow, firstCol).value<QString>();
+                                mergedCellText += mergedText;
+                                isCellSpan = true;
+                            }
+                        }
+                        if(isCellSpan) {
+                            qDebug() << QString("Found MergedCell at (%1, %2) for (%3, %4) cells").arg(row).arg(col).arg(spanRowCount).arg(spanColCount);
+                            createItem(row - 1, col, mergedCellText, fontColor, bgColor, false, spanRowCount + 1, spanColCount + 1);
+                            row += spanRowCount;
+                            col += spanColCount;
+                            continue;
+                        }
+                    }
+                    if (!cellText.isEmpty())
+                        createItem(row - 1, col, cellText, QColor(Qt::black), bgColor, true, 0, 0);
                 }
             }
         }
+        qDebug() << "\n";
     }
 
     tableView->resizeRowsToContents();
@@ -329,7 +354,7 @@ void MainWindow::saveToExcel(const QString &output, const QTableWidget *table)
     qDebug() << Q_FUNC_INFO;
     if (!output.isEmpty()) {
         Document xlsx;
-        QString saveName;
+        QString saveName = "output";
         int headerCount = table->columnCount();
 
         Format headerFormat;
@@ -350,7 +375,6 @@ void MainWindow::saveToExcel(const QString &output, const QTableWidget *table)
         for (int col = 1; col < headerCount; ++col) {
             QString filename = table->horizontalHeaderItem(col)->text();
             QFileInfo fileInfo(filename);
-            saveName = fileInfo.baseName();
 
             xlsx.write(1, col+1, saveName, headerFormat);
 
@@ -360,24 +384,29 @@ void MainWindow::saveToExcel(const QString &output, const QTableWidget *table)
                 format.setVerticalAlignment(Format::AlignVCenter);
                 format.setFontSize(12);
                 format.setFontColor(QColor(Qt::black));
-                format.setFontName("微軟正黑體");
-                format.setTextWarp(true);
+//                format.setFontName("微軟正黑體");
+                format.setFontName("Arial");
+                format.setTextWrap(true);
                 format.setBorderStyle(QXlsx::Format::BorderThin);
 
                 //index begins from 1 instead of 0.
                 if (table->columnSpan(row, 0) == headerCount) { //[header] spanned row
-                    format.setFontColor(QColor(Qt::blue));
-                    format.setPatternBackgroundColor(QColor("#c4c7d8"));
-                    xlsx.write(row+2, 1, table->item(row, 0)->text(), format);
-                    xlsx.mergeCells(CellRange(row+2, 1, row+2, headerCount), format); //Span to all columns
-
+                    QTableWidgetItem * cell = table->item(row, 0);
+                    if (cell != NULL) {
+                        QColor color = cell->backgroundColor();
+                        format.setPatternBackgroundColor(color);
+                        xlsx.write(row+2, 1, cell->text(), format);
+                        xlsx.mergeCells(CellRange(row+2, 1, row+2, headerCount), format); //Span to all columns
+                    }
                 } else {
-                    QString color = table->item(row, col)->backgroundColor().name();
-                    format.setPatternBackgroundColor(QColor(color));
-                    xlsx.write(row+2, col+1, table->item(row, col)->text(), format); //Content column
-//                    format.setLocked(true);
-                    xlsx.write(row+2, 1, table->item(row, 0)->text(), format); //Id column
-                    xlsx.setColumnWidth(col+1, 60); //Content column width
+                    QTableWidgetItem * cell = table->item(row, col);
+                    if (cell != NULL) {
+                        QColor color = cell->backgroundColor();
+                        format.setPatternBackgroundColor(color);
+                        xlsx.write(row+2, col+1, cell->text(), format); //Content column
+                        xlsx.write(row+2, 1, table->item(row, 0)->text(), format); //Id column
+                        xlsx.setColumnWidth(col+1, 60); //Content column width
+                    }
                 }
             }
         }
@@ -388,7 +417,9 @@ void MainWindow::saveToExcel(const QString &output, const QTableWidget *table)
 }
 
 
-void MainWindow::createItem(int row, int col, const QString &text, const QColor &color, bool isEditable, int spanCount)
+void MainWindow::createItem(int row, int col, const QString &text,
+                            const QColor &textColor, const QColor &bgColor,
+                            bool isEditable, int spanRowCount, int spanColCount)
 {
     QTableWidgetItem *item = new QTableWidgetItem(text);
     if (!isEditable) {
@@ -399,11 +430,11 @@ void MainWindow::createItem(int row, int col, const QString &text, const QColor 
         item->setFont(font);
     }
     item->setTextAlignment(Qt::AlignVCenter);
-    item->setBackgroundColor(color);
+    item->setBackgroundColor(bgColor);
     tableView->setItem(row, col, item);
-    if (spanCount > 0) {
-        tableView->setSpan(row, col, 1, spanCount);
-        tableView->item(row, col)->setTextColor(QColor("#092fe4"));
+    if (spanColCount > 0) {
+        tableView->setSpan(row, col, spanRowCount, spanColCount);
+        tableView->item(row, col)->setTextColor(textColor);
     }
 }
 

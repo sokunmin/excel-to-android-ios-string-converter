@@ -57,7 +57,7 @@ private:
     int selectedPlatform;
 
     QDir currentDir;
-    void createItem(int row, int col, const QString &text, const QColor &color, bool isEditable = true, int spanCount = 0);
+    void createItem(int row, int col, const QString &text, const QColor &textColor, const QColor &bgColor, bool isEditable = true, int spanRowCount = 0, int spanColCount = 0);
     int findIndexOfColumn(const QString &header);
     void findCell(const QString &text);
     void openExcel(const QString &input);

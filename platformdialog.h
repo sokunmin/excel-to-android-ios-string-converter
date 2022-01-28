@@ -10,12 +10,10 @@ QT_END_NAMESPACE
 
 namespace Platform {
     enum {
+        EXCEL,
         ANDROID,
-//        IOS,
-        WINDOWS,
-        MACOSX,
-        ENGINE_BOARD,
-        MARKET_EXCEL
+        IOS,
+        WEB
     };
 }
 
@@ -36,12 +34,10 @@ private slots:
 private:
     QButtonGroup *radioGroup;
     QRadioButton *androidButton;
-//    QRadioButton *iosButton;
     QRadioButton *windowsButton;
-    QRadioButton *macosxButton;
-    QRadioButton *engineButton;
-    QRadioButton *marketExcelButton;
-
+    QRadioButton *iosButton;
+    QRadioButton *excelButton;
+    QRadioButton *webButton;
 
     QPushButton *okButton;
     QPushButton *cancelButton;

@@ -5,7 +5,7 @@
 #include <QSettings>
 
 const QString XML_CONTENT_1 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n";
-const QString XML_CONTENT_2 = "<translation revision=\"0.9\" language=\"%1\" languageInEnglish=\"%2\" author=\"XYZ\">";
+const QString XML_CONTENT_2 = "<translation revision=\"0.9\" language=\"%1\" languageInEnglish=\"%2\" author=\"Chun-Ming Su\">";
 const QString XML_CONTENT_3 = "</translation>";
 const QString XML_CONTENT_4 = "</resource>";
 
@@ -112,7 +112,9 @@ void WindowsParser::save(const QString &output, const QTableWidget *table)
                 content.append(QString(XML_CONTENT_2).arg(ini.languageName).arg(ini.languageInEnglish)).append("\n") ;
                 for (int k = 0; k < table->rowCount(); ++k) {
                     if (table->columnSpan(k, 0) == table->columnCount()) { //span row / header
-                        content.append("\n	<!-- ").append(table->item(k, 0)->text()).append(" -->\n");
+                        content.append("\n	<!-- ")
+                               .append(table->item(k, 0)->text())
+                               .append(" -->\n");
                     } else {
 
                         QString color = table->item(k, i)->backgroundColor().name();

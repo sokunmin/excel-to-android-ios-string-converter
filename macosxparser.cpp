@@ -37,9 +37,15 @@ QStringList MacOSXParser::parse(const QDir &dir, const QStringList &files)
                 QRegExp commentx(pattern2);
                 if (commentx.exactMatch(line)) { //Is it a comment?
                     commentx.indexIn(line);
-                    if (!isNameExisted(commentx.cap(1).trimmed())) { //Is the comment added in the map?
+                    QString parsedText = commentx.cap(1).trimmed();
+                    QStringList textList = parsedText.split("|");
+                    if (!isNameExisted(parsedText)) { //Is the comment added in the map?
                         Language * lang = new Language(this);
-                        lang->add(commentx.cap(1).trimmed(), fileInfo.baseName(), "", QColor("#EEEEEE"));
+                        if (textList.size() > 1) {
+                            lang->add(textList.first(), fileInfo.baseName(), "", QColor(textList.last().trimmed()));
+                        } else {
+                            lang->add(parsedText, fileInfo.baseName(), "", QColor("#FFFFFF"));
+                        }
                         lang->isComment = true;
                         langMap.append(lang);
                     }
@@ -88,7 +94,18 @@ void MacOSXParser::save(const QString &output, const QTableWidget *table)
                 QString content;
                 for (int k = 0; k < table->rowCount(); ++k) {
                     if (table->columnSpan(k, 0) == table->columnCount()) { //span row / header
-                        content.append("\n	// ").append(table->item(k, 0)->text()).append("\n");
+                        QTableWidgetItem *cell = table->item(k, 0);
+                        if (cell != NULL) {
+                            QColor bgColor = cell->backgroundColor();
+                            QString headerText = cell->text();
+                            if (k != 0 && i == 1) {
+                                content.append("\n// ")
+                                       .append(headerText)
+                                       .append("|")
+                                       .append(bgColor.name())
+                                       .append("\n");
+                            }
+                        }
                     } else {
 
                         QString color = table->item(k, i)->backgroundColor().name();
