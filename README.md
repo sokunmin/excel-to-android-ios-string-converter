@@ -1,7 +1,8 @@
-# StringResourceConverter
-* Convert string resource files of multiple languages for various platforms in-between, including Excel, Android, iOS, Windows and Mac OS X platforms.
-* 不同平台的多國語系資源檔的轉換工具，例如Android與iOS互轉，或輸出成Excel。
-* Excel輸出成Android/iOS/Mac OS X的多國語系的資源檔。
+# String Resource Converter
+* [x] Converting string resources of Android/iOS platforms to Excel
+* [x] Converting Excel `.xlsx` to the string resources of Android/iOS platform
+* [x] 不同平台的多國語系資源檔的轉換工具，例如Android與iOS互轉，或輸出成Excel。
+* [x] Excel輸出成Android/iOS/Mac OS X的多國語系的資源檔。
 
 ## Input/Output options.
 ![Output format](https://github.com/sokunmin/StringResourceConverter/blob/master/demo_resources/1.png)
